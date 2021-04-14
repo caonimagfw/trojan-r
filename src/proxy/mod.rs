@@ -7,6 +7,7 @@ use std::{
 use log::LevelFilter;
 use serde::Deserialize;
 use tokio::io::{split, AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
+use tokio::time::{sleep, Duration};
 
 use crate::{
     error::Error,
@@ -36,7 +37,7 @@ use crate::{
     },
 };
 
-const RELAY_BUFFER_SIZE: usize = 0x4000;
+const RELAY_BUFFER_SIZE: usize = 0x4000 - 1;
 
 async fn copy_udp<R: UdpRead, W: UdpWrite>(r: &mut R, w: &mut W) -> io::Result<()> {
     let mut buf = [0u8; RELAY_BUFFER_SIZE];
@@ -63,6 +64,7 @@ async fn copy_tcp<R: AsyncRead + Unpin, W: AsyncWrite + Unpin>(
         }
         w.write(&buf[..len]).await?;
     }
+    sleep(Duration::from_millis(10)).await;
     Ok(())
 }
 
