@@ -1,4 +1,4 @@
-# Trojan-R
+# Trojan-R 
 
 高性能的 Trojan 代理，使用 Rust 实现。为嵌入式设备或低性能机器设计。R 意为 **R**ust / **R**apid。
 
