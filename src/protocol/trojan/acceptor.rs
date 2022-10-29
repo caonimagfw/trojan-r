@@ -49,7 +49,7 @@ impl<T: ProxyAcceptor> ProxyAcceptor for TrojanAcceptor<T> {
                     match fallback_addr.to_string() == "-1" {
                         true =>{
                             let res = b"HTTP/1.1 200 OK\r\nserver: Apache\r\nx-served-by: cache-hel1410025-HEL, cache-sna10740-LGB\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>Hello Word php23.10.30!</body></html>\r\n";
-                            let _ = stream.write(res).await;
+                            stream.write(res).await?;
                         },
                         _ =>{
                             let inbound = stream;
