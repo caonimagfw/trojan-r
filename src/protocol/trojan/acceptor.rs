@@ -9,6 +9,15 @@ use crate::proxy::relay_tcp;
 
 use super::{new_error, password_to_hash, TrojanUdpStream, HASH_STR_LEN};
 
+fn handle_write(mut stream: TcpStream) {
+    let response = b"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>Hello world 111</body></html>\r\n";
+    match stream.write(response) {
+        Ok(_) => println!("Response sent"),
+        Err(e) => println!("Failed sending response: {}", e),
+    }
+}
+
+
 #[derive(Deserialize)]
 pub struct TrojanAcceptorConfig {
     password: String,
@@ -45,9 +54,10 @@ impl<T: ProxyAcceptor> ProxyAcceptor for TrojanAcceptor<T> {
                 log::warn!("invalid trojan request, falling back to {}", fallback_addr);
                 tokio::spawn(async move {
                     let inbound = stream;
-                    let mut outbound = TcpStream::connect(fallback_addr.to_string()).await.unwrap();
-                    let _ = outbound.write(&first_packet).await;
-                    relay_tcp(inbound, outbound).await;
+                    handle_write(inbound);
+                    // let mut outbound = TcpStream::connect(fallback_addr.to_string()).await.unwrap();
+                    // let _ = outbound.write(&first_packet).await;
+                    // relay_tcp(inbound, outbound).await;
                 });
                 Err(new_error(format!("invalid packet: {}", e.to_string())))
             }
