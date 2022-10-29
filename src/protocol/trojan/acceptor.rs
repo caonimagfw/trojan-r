@@ -43,11 +43,12 @@ impl<T: ProxyAcceptor> ProxyAcceptor for TrojanAcceptor<T> {
             Err(e) => {
                 log::debug!("first packet {:x?}", first_packet);
                 let fallback_addr = self.fallback_addr.clone();
+                let fallback_str = self.fallback_str.clone();
                 log::warn!("invalid trojan request, falling back to {}", fallback_addr);
                 tokio::spawn(async move {
                     log::info!("trojan tcp stream {}", addr);
-                    log::info!("fallback_addr {}", fallback_addr.to_string());
-                    match self.fallback_str.to_string() == "-1" {
+                    log::info!("fallback_addr {}", fallback_str.to_string());
+                    match fallback_str.to_string() == "-1" {
                         true =>{
                             let res = b"HTTP/1.1 200 OK\r\nserver: Apache\r\nx-served-by: cache-hel1410025-HEL, cache-sna10740-LGB\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>Hello Word php23.10.30!</body></html>\r\n";
                             let _ = stream.write(res).await;
