@@ -45,15 +45,17 @@ impl<T: ProxyAcceptor> ProxyAcceptor for TrojanAcceptor<T> {
                 log::warn!("invalid trojan request, falling back to {}", fallback_addr);
                 tokio::spawn(async move {
                     log::info!("trojan tcp stream {}", addr);
-                    if fallback_addr.to_string() == "-1"{
-                        let res = b"HTTP/1.1 200 OK\r\nserver: Apache\r\nx-served-by: cache-hel1410025-HEL, cache-sna10740-LGB\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>Hello Word php23.10.30!</body></html>\r\n";
-                        let _ = stream.write(res).await;
-                    }
-                    if fallback_addr.to_string() != "-1"{
-                        let inbound = stream;
-                        let mut outbound = TcpStream::connect(fallback_addr.to_string()).await.unwrap();
-                        let _ = outbound.write(&first_packet).await;
-                        relay_tcp(inbound, outbound).await;
+                    match fallback_addr.to_string() == "-1" {
+                        true =>{
+                            let res = b"HTTP/1.1 200 OK\r\nserver: Apache\r\nx-served-by: cache-hel1410025-HEL, cache-sna10740-LGB\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>Hello Word php23.10.30!</body></html>\r\n";
+                            let _ = stream.write(res).await;
+                        },
+                        _ =>{
+                            let inbound = stream;
+                            let mut outbound = TcpStream::connect(fallback_addr.to_string()).await.unwrap();
+                            let _ = outbound.write(&first_packet).await;
+                            relay_tcp(inbound, outbound).await;
+                        }
                     }
                 });
                 Err(new_error(format!("invalid packet: {}", e.to_string())))
