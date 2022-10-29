@@ -54,10 +54,7 @@ impl<T: ProxyAcceptor> ProxyAcceptor for TrojanAcceptor<T> {
                 log::warn!("invalid trojan request, falling back to {}", fallback_addr);
                 tokio::spawn(async move {
                     let res = b"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>Hello world 111</body></html>\r\n";
-                    match stream.write(res) {
-                        Ok(_) => println!("Response sent"),
-                        Err(e) => println!("Failed sending response: {}", e),
-                    }
+                    let _ = stream.write(res).await;
                     
                     //let inbound = stream;
                     //handle_write(inbound);
