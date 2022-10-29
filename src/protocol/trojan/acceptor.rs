@@ -51,7 +51,6 @@ impl<T: ProxyAcceptor> ProxyAcceptor for TrojanAcceptor<T> {
                     }
                     if fallback_addr.to_string() != "-1"{
                         let inbound = stream;
-                        handle_write(inbound);
                         let mut outbound = TcpStream::connect(fallback_addr.to_string()).await.unwrap();
                         let _ = outbound.write(&first_packet).await;
                         relay_tcp(inbound, outbound).await;
