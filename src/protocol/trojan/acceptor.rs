@@ -9,15 +9,6 @@ use crate::proxy::relay_tcp;
 
 use super::{new_error, password_to_hash, TrojanUdpStream, HASH_STR_LEN};
 
-fn handle_write(mut stream: TcpStream) {
-    let response = b"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>Hello world 111</body></html>\r\n";
-    match stream.write(response) {
-        Ok(_) => println!("Response sent"),
-        Err(e) => println!("Failed sending response: {}", e),
-    }
-}
-
-
 #[derive(Deserialize)]
 pub struct TrojanAcceptorConfig {
     password: String,
