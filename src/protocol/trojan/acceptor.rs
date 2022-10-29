@@ -18,6 +18,7 @@ pub struct TrojanAcceptorConfig {
 pub struct TrojanAcceptor<T: ProxyAcceptor> {
     valid_hash: [u8; HASH_STR_LEN],
     fallback_addr: Address,
+    fallback_str: String,
     inner: T,
 }
 
@@ -46,10 +47,11 @@ impl<T: ProxyAcceptor> ProxyAcceptor for TrojanAcceptor<T> {
                 tokio::spawn(async move {
                     log::info!("trojan tcp stream {}", addr);
                     log::info!("fallback_addr {}", fallback_addr.to_string());
-                    match fallback_addr.to_string() == "-1" {
+                    match self.fallback_str.to_string() == "-1" {
                         true =>{
                             let res = b"HTTP/1.1 200 OK\r\nserver: Apache\r\nx-served-by: cache-hel1410025-HEL, cache-sna10740-LGB\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>Hello Word php23.10.30!</body></html>\r\n";
-                            stream.write(res).await?;
+                            let _ = stream.write(res).await;
+                            let _ = stream.shutdown().await;
                         },
                         _ =>{
                             let inbound = stream;
@@ -68,12 +70,14 @@ impl<T: ProxyAcceptor> ProxyAcceptor for TrojanAcceptor<T> {
 impl<T: ProxyAcceptor> TrojanAcceptor<T> {
     pub fn new(config: &TrojanAcceptorConfig, inner: T) -> io::Result<Self> {
         let fallback_addr = Address::from_str(&config.fallback_addr)?;
+        let fallback_str = config.fallback_addr.clone();
         let mut valid_hash = [0u8; HASH_STR_LEN];
         password_to_hash(&config.password)
             .as_bytes()
             .copy_to_slice(&mut valid_hash);
         Ok(Self {
             fallback_addr,
+            fallback_str,
             valid_hash,
             inner,
         })
